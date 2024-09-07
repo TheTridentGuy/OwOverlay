@@ -1,5 +1,7 @@
 import wx
 import pywinctl as wc
+import sys
+print(sys.argv)
 
 
 class Overlay(wx.Frame):
@@ -9,11 +11,11 @@ class Overlay(wx.Frame):
         wx.Frame.__init__(self, None, title='overlay', style=style)
         self.SetBackgroundColour(wx.TransparentColour)
         self.Size = wx.DisplaySize()
-        self.OverlayHeight = 300
-        self.YOverlap = 70
+        self.OverlayHeight = int(sys.argv[2])
+        self.YOverlap = int(sys.argv[3])
         self.Position = (0, 0)
         self.Show(True)
-        png = wx.Image("ears1.png", wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        png = wx.Image(sys.argv[1], wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         awin = wc.getActiveWindow()
         self.bmp = wx.StaticBitmap(self, -1, png, (awin.position[0], (awin.position[1]-self.OverlayHeight)+self.YOverlap), (awin.size[0], self.OverlayHeight))
         self.timer = wx.Timer(self)
