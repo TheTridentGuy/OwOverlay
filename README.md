@@ -1,3 +1,4 @@
+![image](ears1.png)
 # OwOverlay
 Give all your windows s fursona because why not?
 # Usage:
