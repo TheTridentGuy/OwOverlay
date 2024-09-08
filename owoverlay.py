@@ -18,15 +18,15 @@ class Overlay(wx.Frame):
         wx.Frame.__init__(self, None, title='overlay', style=style)
         self.SetBackgroundColour(wx.TransparentColour)
         self.Size = wx.DisplaySize()
-        if pathlib.Path(config_path).exists():
+        if 4 == len(sys.argv):
+            self.PNGFile = sys.argv[1]
+            self.OverlayHeight = int(sys.argv[2])
+            self.YOverlap = int(sys.argv[3])
+        elif pathlib.Path(config_path).exists():
             cfg = json.load(open(config_path, "r"))
             self.PNGFile = cfg.get("file")
             self.OverlayHeight = cfg.get("height")
             self.YOverlap = cfg.get("y_overlap")
-        elif 4 == len(sys.argv):
-            self.PNGFile = sys.argv[1]
-            self.OverlayHeight = int(sys.argv[2])
-            self.YOverlap = int(sys.argv[3])
         else:
             self.PNGFile = filedialog.askopenfilename(title="Select Overlay PNG")
             self.OverlayHeight = simpledialog.askinteger("Set Overlay Height", "Set the overlay height in pixels:")
