@@ -17,4 +17,4 @@ Command Line Config:
 
 # Dependencies:
 - **wxPython:** `pip3 install wxPython`
-- **PyWinCtl:** `pip3 install PyWinCtl`
+- **pyobjc:** `pip3 install pyobjc`
