@@ -2,17 +2,34 @@ import wx
 import pywinctl as wc
 import sys
 from tkinter import filedialog, simpledialog
+import pathlib
+import json
+import random
 
+
+config_path = "config.json"
 
 
 class Overlay(wx.Frame):
     def __init__(self):
+        strings = [
+            "ฅ^•ﻌ•^ฅ OwOverlay is starting up. Count how many times you can say UwU while you wait.",
+            "ദ്ദി（• ˕ •マ.ᐟ This cat is giving you a thumbs up because you dropped a star on GitHub, right? right?",
+            "/ᐠ > ˕ <マ ₊˚⊹♡ Enjoy some love from this cat while you wait for OwOverlay to start.",
+            "/ᐠﹷ ‸ ﹷ ᐟ\ﾉ Your GitHub stars feed this cat."
+        ]
+        print(random.choice(strings))
         style = (wx.CLIP_CHILDREN | wx.STAY_ON_TOP | wx.FRAME_NO_TASKBAR |
                   wx.NO_BORDER | wx.FRAME_SHAPED)
         wx.Frame.__init__(self, None, title='overlay', style=style)
         self.SetBackgroundColour(wx.TransparentColour)
         self.Size = wx.DisplaySize()
-        if 4 == len(sys.argv):
+        if pathlib.Path(config_path).exists():
+            cfg = json.load(open(config_path, "r"))
+            self.PNGFile = cfg.get("file")
+            self.OverlayHeight = cfg.get("height")
+            self.YOverlap = cfg.get("y_overlap")
+        elif 4 == len(sys.argv):
             self.PNGFile = sys.argv[1]
             self.OverlayHeight = int(sys.argv[2])
             self.YOverlap = int(sys.argv[3])
@@ -20,9 +37,10 @@ class Overlay(wx.Frame):
             self.PNGFile = filedialog.askopenfilename(title="Select Overlay PNG")
             self.OverlayHeight = simpledialog.askinteger("Set Overlay Height", "Set the overlay height in pixels:")
             self.YOverlap = simpledialog.askinteger("Set Overlay Y-Offset", "Set how far below the top of the window should the overlay go:")
+        print(self.PNGFile, self.OverlayHeight, self.YOverlap)
         self.Position = (0, 0)
         self.Show(True)
-        png = wx.Image(sys.argv[1], wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        png = wx.Image(self.PNGFile, wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         awin = wc.getActiveWindow()
         self.bmp = wx.StaticBitmap(self, -1, png, (awin.position[0], (awin.position[1]-self.OverlayHeight)+self.YOverlap), (awin.size[0], self.OverlayHeight))
         self.Show(True)
