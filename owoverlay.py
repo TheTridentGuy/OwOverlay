@@ -1,10 +1,10 @@
 import wx
-import pywinctl as wc
 import sys
 from tkinter import filedialog, simpledialog
 import pathlib
 import json
 import random
+import activewindow as aw
 
 
 config_path = "config.json"
@@ -35,7 +35,10 @@ class Overlay(wx.Frame):
         self.Position = (0, 0)
         self.Show(True)
         png = wx.Image(self.PNGFile, wx.BITMAP_TYPE_ANY).ConvertToBitmap()
-        awin = wc.getActiveWindow()
+        while True:
+            awin = aw.get_active_window()
+            if awin:
+                break
         self.bmp = wx.StaticBitmap(self, -1, png, (awin.position[0], (awin.position[1]-self.OverlayHeight)+self.YOverlap), (awin.size[0], self.OverlayHeight))
         self.Show(True)
         self.timer = wx.Timer(self)
@@ -43,7 +46,7 @@ class Overlay(wx.Frame):
         self.timer.Start(100)
 
     def update(self, _):
-        awin = wc.getActiveWindow()
+        awin = aw.get_active_window()
         if awin:
             self.bmp.SetPosition((awin.position[0],  (awin.position[1]-self.OverlayHeight)+self.YOverlap))
             self.bmp.SetSize(wx.Size(awin.size[0], self.OverlayHeight))
