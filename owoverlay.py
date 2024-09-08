@@ -18,6 +18,9 @@ class Overlay(wx.Frame):
             "/ᐠ > ˕ <マ ₊˚⊹♡ Enjoy some love from this cat while you wait for OwOverlay to start.",
             "/ᐠﹷ ‸ ﹷ ᐟ\ﾉ Your GitHub stars feed this cat."
         ]
+        if "UwU" in sys.argv:
+            while True:
+                print("UwU")
         print(random.choice(strings))
         style = (wx.CLIP_CHILDREN | wx.STAY_ON_TOP | wx.FRAME_NO_TASKBAR |
                   wx.NO_BORDER | wx.FRAME_SHAPED)
