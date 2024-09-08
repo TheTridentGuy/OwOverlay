@@ -1,6 +1,6 @@
 ![image](ears1.png)
 # OwOverlay
-Give all your windows s fursona because why not?
+Give all your windows a fursona because why not?
 # Usage:
 Default (load config from `config.json`):
 `python3 overlay.py`
