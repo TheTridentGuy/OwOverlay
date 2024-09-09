@@ -43,7 +43,7 @@ class Overlay(wx.Frame):
         self.Show(True)
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.update, self.timer)
-        self.timer.Start(100)
+        self.timer.Start(1)
 
     def update(self, _):
         awin = aw.get_active_window()
