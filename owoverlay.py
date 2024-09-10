@@ -1,37 +1,22 @@
 import wx
 import sys
-from tkinter import filedialog, simpledialog
 import pathlib
 import json
 import random
 import activewindow as aw
-
-
-config_path = "config.json"
+import zipfile
 
 
 class Overlay(wx.Frame):
-    def __init__(self):
-        print(random.choice(strings))
+    def __init__(self, png, overlay_height, y_overlap):
         style = (wx.CLIP_CHILDREN | wx.STAY_ON_TOP | wx.FRAME_NO_TASKBAR |
-                  wx.NO_BORDER | wx.FRAME_SHAPED)
+                 wx.NO_BORDER | wx.FRAME_SHAPED)
         wx.Frame.__init__(self, None, title='overlay', style=style)
         self.SetBackgroundColour(wx.TransparentColour)
         self.Size = wx.DisplaySize()
-        if 4 == len(sys.argv):
-            self.PNGFile = sys.argv[1]
-            self.OverlayHeight = int(sys.argv[2])
-            self.YOverlap = int(sys.argv[3])
-        elif pathlib.Path(config_path).exists():
-            cfg = json.load(open(config_path, "r"))
-            self.PNGFile = cfg.get("file")
-            self.OverlayHeight = cfg.get("height")
-            self.YOverlap = cfg.get("y_overlap")
-        else:
-            self.PNGFile = filedialog.askopenfilename(title="Select Overlay PNG")
-            self.OverlayHeight = simpledialog.askinteger("Set Overlay Height", "Set the overlay height in pixels:")
-            self.YOverlap = simpledialog.askinteger("Set Overlay Y-Offset", "Set how far below the top of the window should the overlay go:")
-        print(self.PNGFile, self.OverlayHeight, self.YOverlap)
+        self.PNGFile = png
+        self.OverlayHeight = overlay_height
+        self.YOverlap = y_overlap
         self.Position = (0, 0)
         self.Show(True)
         png = wx.Image(self.PNGFile, wx.BITMAP_TYPE_ANY).ConvertToBitmap()
@@ -39,7 +24,9 @@ class Overlay(wx.Frame):
             awin = aw.get_active_window()
             if awin:
                 break
-        self.bmp = wx.StaticBitmap(self, -1, png, (awin.position[0], (awin.position[1]-self.OverlayHeight)+self.YOverlap), (awin.size[0], self.OverlayHeight))
+        self.bmp = wx.StaticBitmap(self, -1, png,
+                                   (awin.position[0], (awin.position[1] - self.OverlayHeight) + self.YOverlap),
+                                   (awin.size[0], self.OverlayHeight))
         self.Show(True)
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.update, self.timer)
@@ -48,8 +35,57 @@ class Overlay(wx.Frame):
     def update(self, _):
         awin = aw.get_active_window()
         if awin:
-            self.bmp.SetPosition((awin.position[0],  (awin.position[1]-self.OverlayHeight)+self.YOverlap))
+            self.bmp.SetPosition((awin.position[0], (awin.position[1] - self.OverlayHeight) + self.YOverlap))
             self.bmp.SetSize(wx.Size(awin.size[0], self.OverlayHeight))
+
+
+class MainWindow(wx.Frame):
+    def __init__(self):
+        wx.Frame.__init__(self, None, title="OwOverlay Settings", pos=wx.DefaultPosition,
+                          size=wx.Size(400, 150), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+        self.SetSizeHints(wx.Size(400, 150), wx.Size(400, 150))
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.fp_label = wx.StaticText(self, wx.ID_ANY, "Decoration Pack:", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.fp_label.Wrap(-1)
+        main_sizer.Add(self.fp_label, 0, wx.ALL, 5)
+        self.file_picker = wx.FilePickerCtrl(self, wx.ID_ANY, wx.EmptyString, "Select a file", "ZIP and OWO files (*.zip;*.owo)|*.zip;*.owo|All Files (*.*)|*.*",
+                                             wx.DefaultPosition, wx.Size(400, -1), wx.FLP_DEFAULT_STYLE)
+        main_sizer.Add(self.file_picker, 0, wx.ALL, 5)
+        self.start_button = wx.Button(self, wx.ID_ANY, "Start Overlay", wx.Point(100, -1), wx.DefaultSize, 0)
+        main_sizer.Add(self.start_button, 1, wx.ALIGN_RIGHT | wx.TOP | wx.RIGHT | wx.LEFT, 5)
+        self.SetSizer(main_sizer)
+        self.Layout()
+        self.Centre(wx.BOTH)
+        # All non wxFB code below:
+        self.overlay_running = False
+        self.start_button.Bind(wx.EVT_BUTTON, self.on_start_click)
+
+    def on_start_click(self, _):
+        path = self.file_picker.GetPath()
+        print(path)
+        if self.overlay_running:
+            self.overlay_running = False
+            self.overlay.Hide()
+            self.start_button.SetLabel("Start Overlay")
+        elif pathlib.Path(path).exists() and zipfile.is_zipfile(path):
+            try:
+                with zipfile.ZipFile(path) as zip:
+                    print(zip.namelist())
+                    root = zip.namelist()[0]
+                    cfg = json.loads(zip.open(root + "config.json", "r").read())
+                    self.overlay = Overlay(zip.open(root + cfg.get("overlay_png")), cfg.get("height"), cfg.get("y_overlap"))
+            except Exception as e:
+                wx.MessageBox(f"Error loading message pack from path {path}: {str(e)}",
+                              caption="Error Loading File", style=wx.OK)
+                print(e)
+                return
+
+            self.overlay.Show()
+            self.overlay_running = True
+            self.start_button.SetLabel("Stop Overlay")
+        else:
+            wx.MessageBox(f"Error loading message pack from path {path}: file does not exist or is not a zip archive",
+                              caption="Error Loading File", style=wx.OK)
 
 
 strings = [
@@ -60,6 +96,7 @@ strings = [
 ]
 if "UwU" in sys.argv:
     import time
+
     print("Super Cat Mode Enabled!")
     for i in range(5, 0, -1):
         print(i)
@@ -74,8 +111,9 @@ if "UwU" in sys.argv:
             "=^◕⩊◕^="
         ]
         print(random.choice(cat_faces))
-
+print(random.choice(strings))
 
 app = wx.App()
-f = Overlay()
+mainwin = MainWindow()
+mainwin.Show()
 app.MainLoop()
