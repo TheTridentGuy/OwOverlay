@@ -48,7 +48,8 @@ class MainWindow(wx.Frame):
         self.fp_label = wx.StaticText(self, wx.ID_ANY, "Decoration Pack:", wx.DefaultPosition, wx.DefaultSize, 0)
         self.fp_label.Wrap(-1)
         main_sizer.Add(self.fp_label, 0, wx.ALL, 5)
-        self.file_picker = wx.FilePickerCtrl(self, wx.ID_ANY, wx.EmptyString, "Select a file", "ZIP and OWO files (*.zip;*.owo)|*.zip;*.owo|All Files (*.*)|*.*",
+        self.file_picker = wx.FilePickerCtrl(self, wx.ID_ANY, wx.EmptyString, "Select a file",
+                                             "ZIP and OWO files (*.zip;*.owo)|*.zip;*.owo|All Files (*.*)|*.*",
                                              wx.DefaultPosition, wx.Size(400, -1), wx.FLP_DEFAULT_STYLE)
         main_sizer.Add(self.file_picker, 0, wx.ALL, 5)
         self.start_button = wx.Button(self, wx.ID_ANY, "Start Overlay", wx.Point(100, -1), wx.DefaultSize, 0)
@@ -59,6 +60,7 @@ class MainWindow(wx.Frame):
         # All non wxFB code below:
         self.overlay_running = False
         self.start_button.Bind(wx.EVT_BUTTON, self.on_start_click)
+        self.overlay = None
 
     def on_start_click(self, _):
         path = self.file_picker.GetPath()
@@ -69,11 +71,12 @@ class MainWindow(wx.Frame):
             self.start_button.SetLabel("Start Overlay")
         elif pathlib.Path(path).exists() and zipfile.is_zipfile(path):
             try:
-                with zipfile.ZipFile(path) as zip:
-                    print(zip.namelist())
-                    root = zip.namelist()[0]
-                    cfg = json.loads(zip.open(root + "config.json", "r").read())
-                    self.overlay = Overlay(zip.open(root + cfg.get("overlay_png")), cfg.get("height"), cfg.get("y_overlap"))
+                with zipfile.ZipFile(path) as zipf:
+                    print(zipf.namelist())
+                    root = zipf.namelist()[0]
+                    cfg = json.loads(zipf.open(root + "config.json", "r").read())
+                    self.overlay = Overlay(zipf.open(root + cfg.get("overlay_png")), cfg.get("height"),
+                                           cfg.get("y_overlap"))
             except Exception as e:
                 wx.MessageBox(f"Error loading message pack from path {path}: {str(e)}",
                               caption="Error Loading File", style=wx.OK)
@@ -85,7 +88,7 @@ class MainWindow(wx.Frame):
             self.start_button.SetLabel("Stop Overlay")
         else:
             wx.MessageBox(f"Error loading message pack from path {path}: file does not exist or is not a zip archive",
-                              caption="Error Loading File", style=wx.OK)
+                          caption="Error Loading File", style=wx.OK)
 
 
 strings = [
