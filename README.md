@@ -2,19 +2,14 @@
 # OwOverlay
 Give all your windows a fursona, because why not?
 # Usage:
-Default (load config from `config.json`):
-`python3 overlay.py`
-Command Line Config:
-`python3 overlay.py <png file> <overlay height> <y offset>`
-> **Example:**
-> 
-> `python3 owoverlay.py ears1.png 300 80`
+- **Binary (recommended):** `./owoverlay <path to decoration pack>`
+- **Python script:** `python3 overlay.py <path to decoration pack>`
 
-- **PNG File:** the png file, i.e. `ears1.png`
-- **Overlay Height:** the height of the overlay, in pixels.
-- **Y Offset:** amount of distance (in pixels) below the top of the window that the ears should display.
-> You can edit the above options in config.json as well
+`<path to decoration pack>` is an optional argument that will immediately launch
+OwOverlay with the specified decoration pack, disabling the GUI. If a problem
+is encountered loading the specified decoration pack, however, it will proceed to launch the GUI.
 
 # Dependencies:
+> Note that all non-pre-release binaries should be packaged with all dependencies
 - **wxPython:** `pip3 install wxPython`
 - **pyobjc:** `pip3 install pyobjc`
