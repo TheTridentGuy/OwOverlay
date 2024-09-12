@@ -71,14 +71,9 @@ class MainWindow(wx.Frame):
             self.start_button.SetLabel("Start Overlay")
         elif pathlib.Path(path).exists() and zipfile.is_zipfile(path):
             try:
-                with zipfile.ZipFile(path) as zipf:
-                    print(zipf.namelist())
-                    root = zipf.namelist()[0]
-                    cfg = json.loads(zipf.open(root + "config.json", "r").read())
-                    self.overlay = Overlay(zipf.open(root + cfg.get("overlay_png")), cfg.get("height"),
-                                           cfg.get("y_overlap"))
+                self.overlay = get_overlay(path)
             except Exception as e:
-                wx.MessageBox(f"Error loading message pack from path {path}: {str(e)}",
+                wx.MessageBox(f"Error loading decoration pack from path {path}: {repr(e)}",
                               caption="Error Loading File", style=wx.OK)
                 print(e)
                 return
@@ -87,8 +82,17 @@ class MainWindow(wx.Frame):
             self.overlay_running = True
             self.start_button.SetLabel("Stop Overlay")
         else:
-            wx.MessageBox(f"Error loading message pack from path {path}: file does not exist or is not a zip archive",
+            wx.MessageBox(f"Error loading decoration pack from path {path}: file does not exist or is not a zip archive",
                           caption="Error Loading File", style=wx.OK)
+
+
+def get_overlay(path):
+    with zipfile.ZipFile(path) as zipf:
+        print(zipf.namelist())
+        root = zipf.namelist()[0]
+        cfg = json.loads(zipf.open(root + "config.json", "r").read())
+        return Overlay(zipf.open(root + cfg.get("overlay_png")), cfg.get("height"),
+                               cfg.get("y_overlap"))
 
 
 strings = [
@@ -99,7 +103,6 @@ strings = [
 ]
 if "UwU" in sys.argv:
     import time
-
     print("Super Cat Mode Enabled!")
     for i in range(5, 0, -1):
         print(i)
@@ -117,6 +120,15 @@ if "UwU" in sys.argv:
 print(random.choice(strings))
 
 app = wx.App()
+if 2 == len(sys.argv):
+    try:
+        path = sys.argv[1]
+        overlay = get_overlay(path)
+        overlay.Show()
+        app.MainLoop()
+        sys.exit(0)
+    except Exception as e:
+        print(f"Error loading decoration pack from path {path}: {e}, continuing to GUI.")
 mainwin = MainWindow()
 mainwin.Show()
 app.SetExitOnFrameDelete(True)
