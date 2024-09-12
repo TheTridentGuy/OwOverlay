@@ -73,7 +73,7 @@ class MainWindow(wx.Frame):
             try:
                 self.overlay = get_overlay(path)
             except Exception as e:
-                wx.MessageBox(f"Error loading decoration pack from path {path}: {str(e)}",
+                wx.MessageBox(f"Error loading decoration pack from path {path}: {repr(e)}",
                               caption="Error Loading File", style=wx.OK)
                 print(e)
                 return
