@@ -1,6 +1,16 @@
-from AppKit import NSWorkspace
-from Quartz import CGWindowListCopyWindowInfo, kCGWindowListOptionOnScreenOnly, kCGNullWindowID
+import platform
 
+
+class UnsupportedPlatformException(Exception):
+    pass
+
+if platform.system() == "Darwin":
+    from AppKit import NSWorkspace
+    from Quartz import CGWindowListCopyWindowInfo, kCGWindowListOptionOnScreenOnly, kCGNullWindowID
+elif platform.system() == "Windows":
+    pass
+else:
+    raise UnsupportedPlatformException(f"Unsupported platform: {platform.system()}")
 
 def get_active_window():
     active_win_name = NSWorkspace.sharedWorkspace().activeApplication()['NSApplicationName']
